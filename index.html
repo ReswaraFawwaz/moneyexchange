@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konverter Mata Uang Rupiah - Real Time</title>
+    <meta name="description" content="Konverter mata uang rupiah ke dollar, euro, dan mata uang populer lainnya. Update real-time dan gratis.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .converter-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .currency-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .currency-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .swap-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .swap-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            background: #e8f5e8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 5px solid #4caf50;
+        }
+
+        .result-amount {
+            font-size: 2em;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .result-info {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .copy-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .rates-info {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .rates-info h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .rate-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .rate-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #f44336;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .update-time {
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .converter-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💱 Konverter Mata Uang</h1>
+            <p>Konversi Rupiah ke mata uang populer dunia</p>
+        </div>
+
+        <div class="converter-box">
+            <div class="input-group">
+                <label for="amount">Jumlah Rupiah (IDR)</label>
+                <input type="text" id="amount" class="amount-input" placeholder="Masukkan jumlah rupiah..." value="0">
+            </div>
+
+            <button class="swap-btn" id="swapBtn" title="Tukar mata uang">⇅</button>
+
+            <div class="input-group">
+                <label for="currency">Mata Uang Tujuan</label>
+                <select id="currency" class="currency-select">
+                    <option value="USD">🇺🇸 US Dollar (USD)</option>
+                    <option value="EUR">🇪🇺 Euro (EUR)</option>
+                    <option value="GBP">🇬🇧 British Pound (GBP)</option>
+                    <option value="JPY">🇯🇵 Japanese Yen (JPY)</option>
+                    <option value="SGD">🇸🇬 Singapore Dollar (SGD)</option>
+                    <option value="AUD">🇦🇺 Australian Dollar (AUD)</option>
+                    <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                    <option value="CAD">🇨🇦 Canadian Dollar (CAD)</option>
+                    <option value="CNY">🇨🇳 Chinese Yuan (CNY)</option>
+                    <option value="MYR">🇲🇾 Malaysian Ringgit (MYR)</option>
+                </select>
+            </div>
+
+            <button class="convert-btn" id="convertBtn">
+                <span id="convertText">Konversi Sekarang</span>
+                <span class="loading" id="loading">Memuat...</span>
+            </button>
+
+            <div id="result" style="display: none;"></div>
+            <div id="error" style="display: none;"></div>
+        </div>
+
+        <div class="rates-info">
+            <h3>📊 Kurs Hari Ini (1 IDR =)</h3>
+            <div id="ratesList">
+                <div class="rate-item">
+                    <span>🇺🇸 USD</span>
+                    <span id="rate-USD">-</span>
+                </div>
+                <div class="rate-item">
+                    <span>🇪🇺 EUR</span>
+                    <span id="rate-EUR">-</span>
+                </div>
+                <div class="rate-item">
+                    <span>🇬🇧 GBP</span>
+                    <span id="rate-GBP">-</span>
+                </div>
+                <div class="rate-item">
+                    <span>🇯🇵 JPY</span>
+                    <span id="rate-JPY">-</span>
+                </div>
+                <div class="rate-item">
+                    <span>🇸🇬 SGD</span>
+                    <span id="rate-SGD">-</span>
+                </div>
+            </div>
+            <div class="update-time" id="updateTime">Memuat data...</div>
+        </div>
+
+        <div class="footer">
+            <p>💡 <strong>Tips:</strong> Refresh halaman untuk update kurs terbaru</p>
+        </div>
+    </div>
+
+    <script>
+        class CurrencyConverter {
+            constructor() {
+                this.apiKey = '0449ada8885cde54d0668a57'; // Ganti dengan API key dari exchangerate-api.com
+                this.baseUrl = 'https://api.exchangerate-api.com/v4/latest/IDR';
+                this.rates = {};
+                this.isSwapped = false;
+                
+                this.initElements();
+                this.bindEvents();
+                this.loadRates();
+            }
+
+            initElements() {
+                this.amountInput = document.getElementById('amount');
+                this.currencySelect = document.getElementById('currency');
+                this.convertBtn = document.getElementById('convertBtn');
+                this.swapBtn = document.getElementById('swapBtn');
+                this.resultDiv = document.getElementById('result');
+                this.errorDiv = document.getElementById('error');
+                this.loading = document.getElementById('loading');
+                this.convertText = document.getElementById('convertText');
+                this.updateTime = document.getElementById('updateTime');
+            }
+
+            bindEvents() {
+                this.convertBtn.addEventListener('click', () => this.convert());
+                this.swapBtn.addEventListener('click', () => this.swap());
+                this.amountInput.addEventListener('input', (e) => this.formatAmount(e));
+                this.amountInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.convert();
+                });
+            }
+
+            formatAmount(e) {
+                let value = e.target.value.replace(/[^\d]/g, '');
+                if (value) {
+                    value = parseInt(value).toLocaleString('id-ID');
+                    e.target.value = value;
+                }
+            }
+
+            async loadRates() {
+                try {
+                    const response = await fetch(this.baseUrl);
+                    const data = await response.json();
+                    
+                    if (data.rates) {
+                        this.rates = data.rates;
+                        this.updateRatesDisplay();
+                        this.updateTime.textContent = `Update terakhir: ${new Date().toLocaleString('id-ID')}`;
+                    }
+                } catch (error) {
+                    console.error('Error loading rates:', error);
+                    this.updateTime.textContent = 'Gagal memuat data kurs';
+                    
+                    // Fallback rates untuk demo
+                    this.rates = {
+                        USD: 0.000067,
+                        EUR: 0.000061,
+                        GBP: 0.000053,
+                        JPY: 0.0098,
+                        SGD: 0.000090,
+                        AUD: 0.000099,
+                        CHF: 0.000060,
+                        CAD: 0.000091,
+                        CNY: 0.000485,
+                        MYR: 0.000314
+                    };
+                    this.updateRatesDisplay();
+                    this.updateTime.textContent = 'Menggunakan data demo';
+                }
+            }
+
+            updateRatesDisplay() {
+                const displayRates = ['USD', 'EUR', 'GBP', 'JPY', 'SGD'];
+                displayRates.forEach(currency => {
+                    const element = document.getElementById(`rate-${currency}`);
+                    if (element && this.rates[currency]) {
+                        const rate = this.rates[currency];
+                        element.textContent = rate < 0.001 ? rate.toFixed(6) : rate.toFixed(4);
+                    }
+                });
+            }
+
+            async convert() {
+                const amountStr = this.amountInput.value.replace(/[^\d]/g, '');
+                const amount = parseInt(amountStr);
+                const targetCurrency = this.currencySelect.value;
+
+                if (!amount || amount <= 0) {
+                    this.showError('Masukkan jumlah yang valid');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.hideError();
+
+                try {
+                    let result;
+                    if (this.isSwapped) {
+                        // Convert from foreign currency to IDR
+                        const rate = 1 / this.rates[targetCurrency];
+                        result = amount * rate;
+                        this.showResult(result, 'IDR', amount, targetCurrency);
+                    } else {
+                        // Convert from IDR to foreign currency
+                        const rate = this.rates[targetCurrency];
+                        result = amount * rate;
+                        this.showResult(result, targetCurrency, amount, 'IDR');
+                    }
+                } catch (error) {
+                    this.showError('Terjadi kesalahan saat konversi');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            showResult(result, resultCurrency, originalAmount, originalCurrency) {
+                const formattedResult = this.formatCurrency(result, resultCurrency);
+                const formattedOriginal = this.formatCurrency(originalAmount, originalCurrency);
+                
+                this.resultDiv.innerHTML = `
+                    <div class="result-amount">${formattedResult}</div>
+                    <div class="result-info">
+                        ${formattedOriginal} = ${formattedResult}
+                        <br>
+                        <button class="copy-btn" onclick="navigator.clipboard.writeText('${formattedResult}')">
+                            📋 Copy Hasil
+                        </button>
+                    </div>
+                `;
+                this.resultDiv.style.display = 'block';
+            }
+
+            formatCurrency(amount, currency) {
+                if (currency === 'IDR') {
+                    return `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
+                } else if (currency === 'JPY') {
+                    return `¥ ${Math.round(amount).toLocaleString('en-US')}`;
+                } else {
+                    return `${this.getCurrencySymbol(currency)} ${amount.toFixed(2).toLocaleString('en-US')}`;
+                }
+            }
+
+            getCurrencySymbol(currency) {
+                const symbols = {
+                    USD: '$', EUR: '€', GBP: '£', JPY: '¥', SGD: 'S$',
+                    AUD: 'A$', CHF: 'CHF', CAD: 'C$', CNY: '¥', MYR: 'RM'
+                };
+                return symbols[currency] || currency;
+            }
+
+            swap() {
+                this.isSwapped = !this.isSwapped;
+                const amountLabel = document.querySelector('label[for="amount"]');
+                const currencyLabel = document.querySelector('label[for="currency"]');
+                
+                if (this.isSwapped) {
+                    amountLabel.textContent = `Jumlah ${this.currencySelect.value}`;
+                    currencyLabel.textContent = 'Konversi ke Rupiah (IDR)';
+                    this.currencySelect.style.display = 'none';
+                    
+                    // Show selected currency info
+                    const selectedOption = this.currencySelect.selectedOptions[0];
+                    currencyLabel.innerHTML = `Konversi ke: ${selectedOption.textContent}`;
+                } else {
+                    amountLabel.textContent = 'Jumlah Rupiah (IDR)';
+                    currencyLabel.textContent = 'Mata Uang Tujuan';
+                    this.currencySelect.style.display = 'block';
+                }
+                
+                this.resultDiv.style.display = 'none';
+            }
+
+            showLoading(show) {
+                if (show) {
+                    this.convertText.style.display = 'none';
+                    this.loading.style.display = 'inline';
+                    this.convertBtn.disabled = true;
+                } else {
+                    this.convertText.style.display = 'inline';
+                    this.loading.style.display = 'none';
+                    this.convertBtn.disabled = false;
+                }
+            }
+
+            showError(message) {
+                this.errorDiv.innerHTML = `<div class="error">❌ ${message}</div>`;
+                this.errorDiv.style.display = 'block';
+                this.resultDiv.style.display = 'none';
+            }
+
+            hideError() {
+                this.errorDiv.style.display = 'none';
+            }
+        }
+
+        // Initialize the converter when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CurrencyConverter();
+        });
+    </script>
+</body>
+</html>
